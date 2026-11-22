@@ -23,7 +23,7 @@ class KiraAIService
             '3. Tulis jawaban secara ringkas, padat, dan langsung ke poin utama.';
 
         $models = [
-            'openrouter/nvidia/nemotron-3-super-120b-a12b:free',
+            'nvidia/nemotron-3-ultra-550b-a55b:free',
             'nvidia/nemotron-3-super-120b-a12b:free',
             'gpt-oss-120b',
 
@@ -37,7 +37,7 @@ class KiraAIService
                         'HTTP-Referer' => 'http://localhost',
                         'Content-Type' => 'application/json',
                     ])
-                    ->post('https://api.cerebras.ai/v1/chat/completions', [
+                    ->post('https://openrouter.ai/api/v1/responses', [
                         'model' => $model,
                         'messages' => [
                             ['role' => 'user', 'content' => $prompt],
