@@ -48,4 +48,7 @@ php artisan filament:optimize || true
 # Ensure Apache worker user (www-data) owns storage and cache files
 chown -R www-data:www-data storage bootstrap/cache
 
+rm -f /etc/apache2/mods-enabled/mpm_event.* /etc/apache2/mods-enabled/mpm_worker.*
+a2enmod mpm_prefork >/dev/null 2>&1 || true
+
 exec apache2-foreground
