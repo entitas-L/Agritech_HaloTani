@@ -34,6 +34,22 @@
         /* Active Menu */
         .nav-link.active { background-color: #e8f5e9; color: #2E7D32; font-weight: 600; }
         .nav-link.active svg { color: #2E7D32; }
+        .nav-badge {
+            margin-left: auto;
+            padding: 0.125rem 0.45rem;
+            border-radius: 0.375rem;
+            background: #fef3c7;
+            color: #92400e;
+            font-size: 0.7rem;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+        .nav-link:focus-visible,
+        .user-card:focus-visible,
+        .logout-btn:focus-visible {
+            outline: 2px solid #1b5e20;
+            outline-offset: 2px;
+        }
 
         /* Footer User */
         .sidebar-footer { display: flex; flex-direction: column; gap: 0.5rem; padding-top: 1rem; border-top: 1px solid #f3f4f6; }
@@ -55,8 +71,14 @@
         .logout-btn:hover { background: #fef2f2; }
 
         /* ===== MAIN CONTENT ===== */
-        .main-content { flex: 1; padding: 2rem; overflow-y: auto; }
+        .main-content { flex: 1; padding: 2rem; overflow-y: auto; min-width: 0; }
         .card { background: #ffffff; padding: 1.5rem; border-radius: 0.6rem; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+
+        @media (max-width: 768px) {
+            .wrapper { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; position: static; border-right: none; border-bottom: 1px solid #e5e7eb; }
+            .main-content { padding: 1rem; }
+        }
     </style>
     @stack('styles')
 </head>
@@ -104,8 +126,9 @@
                 <li>
                     {{-- Menu aktif untuk fitur pupuk --}}
                     <a href="{{ route('pupuk.index') }}" class="nav-link active">
-                        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" /></svg>
+                        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" /></svg>
                         <span>Manajemen Pupuk</span>
+                        <span class="nav-badge">Segera</span>
                     </a>
                 </li>
             </ul>

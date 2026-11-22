@@ -55,6 +55,7 @@ class PetaniPanelProvider extends PanelProvider
             
                 NavigationItem::make('Manajemen Pupuk')
                     ->icon('heroicon-o-archive-box')
+                    ->badge('Segera', color: 'warning')
                     ->sort(4)
                     ->url(fn (): string => route('pupuk.index'))
                     ->isActiveWhen(fn (): bool => request()->routeIs('pupuk.*')),
