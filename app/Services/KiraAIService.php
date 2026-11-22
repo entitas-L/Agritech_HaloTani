@@ -8,10 +8,10 @@ class KiraAIService
 {
     public static function generateSolusi(string $keluhanPetani, string $lokasiLahan): string
     {
-        $apiKey = env('CEREBRAS_API_KEY') ?? config('services.cerebras.key');
+        $apiKey = env('OPENROUTER_API_KEY') ?? config('services.openrouter.key');
 
         if (empty($apiKey)) {
-            throw new \Exception('ERROR: CEREBRAS_API_KEY belum terdeteksi!');
+            throw new \Exception('ERROR: OPENROUTER_API_KEY belum terdeteksi!');
         }
 
         $prompt = "Kamu adalah asisten ahli pertanian 'Agritech Assistant'.\n".
