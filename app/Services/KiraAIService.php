@@ -3,68 +3,73 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class KiraAIService
 {
     public static function generateSolusi(string $keluhanPetani, string $lokasiLahan): string
     {
-        $apiKey = env('OPENROUTER_API_KEY') ?? config('services.openrouter.key');
+        $apiKey = config('services.openrouter.key') ?? env('OPENROUTER_API_KEY');
 
         if (empty($apiKey)) {
             throw new \Exception('ERROR: OPENROUTER_API_KEY belum terdeteksi!');
         }
 
-        $prompt = "Kamu adalah asisten ahli pertanian 'Agritech Assistant'.\n".
-            "Lokasi Lahan: {$lokasiLahan}\n".
-            "Keluhan Tanaman: {$keluhanPetani}\n\n".
-            "ATURAN FORMATTING:\n".
-            "1. JANGAN gunakan simbol '•' inline dalam satu paragraf.\n".
-            "2. WAJIB gunakan format Markdown list (gunakan tanda '-' atau angka di baris baru) untuk setiap poin agar mudah dibaca.\n".
-            '3. Tulis jawaban secara ringkas, padat, dan langsung ke poin utama.';
+        $prompt = "Kamu adalah asisten ahli pertanian 'Agritech Assistant'.\n" .
+            "Lokasi Lahan: {$lokasiLahan}\n" .
+            "Keluhan Tanaman: {$keluhanPetani}\n\n" .
+            "ATURAN FORMATTING:\n" .
+            "1. JANGAN gunakan simbol '•' inline dalam satu paragraf.\n" .
+            "2. WAJIB gunakan format Markdown list (gunakan tanda '-' atau angka di baris baru) untuk setiap poin agar mudah dibaca.\n" .
+            "3. Tulis jawaban secara ringkas, padat, dan langsung ke poin utama.";
 
-        $models = [
-            'nvidia/nemotron-3-ultra-550b-a55b:free',
-            'nvidia/nemotron-3-super-120b-a12b:free',
-            'gpt-oss-120b',
+        $primaryModel = config('services.openrouter.model');
+        $models = array_values(array_unique(array_filter([
+            $primaryModel,
+            'openrouter/free',
+        ])));
 
-        ];
+        $lastError = null;
 
         foreach ($models as $model) {
             try {
-                $response = Http::timeout(35)
+                $response = Http::timeout(25)
                     ->withHeaders([
-                        'Authorization' => 'Bearer '.$apiKey,
-                        'HTTP-Referer' => 'http://localhost',
-                        'Content-Type' => 'application/json',
+                        'Authorization' => 'Bearer ' . $apiKey,
+                        'HTTP-Referer'  => config('app.url', 'https://www.snowfluff.cloud-ip.cc'),
+                        'X-Title'       => config('app.name', 'HaloTani'),
+                        'Content-Type'  => 'application/json',
                     ])
-                    ->post('https://openrouter.ai/api/v1/responses', [
+                    ->post('https://openrouter.ai/api/v1/chat/completions', [
                         'model' => $model,
                         'messages' => [
                             ['role' => 'user', 'content' => $prompt],
                         ],
-                        'max_tokens' => 1000,
+                        'max_tokens' => 1500,
                         'temperature' => 0.7,
                     ]);
 
-                if ($response->successful()) {
-                    $rawBody = $response->body();
+                $content = $response->json('choices.0.message.content');
 
-                    // Buang 'data: [DONE]' dan spasi/enter liar di awal/akhir
-                    $cleanBody = preg_replace('/data:\s*\[DONE\].*/s', '', $rawBody);
-                    $cleanBody = trim($cleanBody);
-
-                    $json = json_decode($cleanBody, true);
-                    $content = $json['choices'][0]['message']['content'] ?? null;
-
-                    if (! empty($content) && ! str_contains($content, 'antrean padat')) {
-                        return $content;
-                    }
+                if ($response->successful() && !empty($content)) {
+                    return $content;
                 }
+
+                $lastError = "HTTP {$response->status()}: " . ($response->json('error.message') ?? $response->body());
+                Log::warning('OpenRouter gagal merespons', [
+                    'model' => $model,
+                    'status' => $response->status(),
+                    'error' => $response->json('error') ?? $response->body(),
+                ]);
             } catch (\Exception $e) {
-                continue;
+                $lastError = $e->getMessage();
+                Log::warning('OpenRouter exception', [
+                    'model' => $model,
+                    'message' => $e->getMessage(),
+                ]);
             }
         }
 
-        throw new \Exception('Sistem AI sedang mengalami antrean padat di semua server. Silakan klik tombol analisis sekali lagi.');
+        throw new \Exception('Sistem AI sedang mengalami antrean padat di semua server. Silakan klik tombol analisis sekali lagi.' . (config('app.debug') && $lastError ? " ({$lastError})" : ''));
     }
 }
